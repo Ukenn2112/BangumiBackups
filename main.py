@@ -141,6 +141,8 @@ class BangumiBackups(BangumiAPI):
             rate integer,
             type integer,
             subject_type integer,
+            vol_status integer,
+            ep_status integer,
             comment varchar(128),
             tags varchar(128),
             updated_at varchar(128))
@@ -148,8 +150,8 @@ class BangumiBackups(BangumiAPI):
         )
         for data in self.data['data']:
             self.conn.execute(
-                '''insert into collections(bgm_id, name, rate, type, subject_type, comment, tags, updated_at) values(?, ?, ?, ?, ?, ?, ?, ?)''',
-                (data['subject_id'], data['subject']['name'], data['rate'], data["type"], data["subject_type"], data["comment"], str(data["tags"]), data["updated_at"])
+                '''insert into collections(bgm_id, name, rate, type, subject_type, vol_status, ep_status, comment, tags, updated_at) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                (data['subject_id'], data['subject']['name'], data['rate'], data["type"], data["subject_type"], data["vol_status"], data["ep_status"], data["comment"], str(data["tags"]), data["updated_at"])
             )
         self.conn.commit()
         
