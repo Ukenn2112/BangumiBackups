@@ -33,19 +33,19 @@ class BangumiBackups(BangumiAPI):
                 params = json.loads(f.read())
                 self.access_token = params['access_token']
                 self.username = params['username']
-                self.console.log(f'[bold green][初始化][/] 检测到配置文件，User Name: [bold green]{self.username}[/]')
+                self.console.print(f'[bold green][初始化][/] 检测到配置文件，User Name: [bold green]{self.username}[/]')
         else:
-            self.console.log('[bold green][初始化][/] 没有找到 "config.json" 配置文件! ')
-            self.console.log('[bold green][初始化][/] 前往 https://next.bgm.tv/demo/access-token 生成 Access Token')
+            self.console.print('[bold green][初始化][/] 没有找到 "config.json" 配置文件! ')
+            self.console.print('[bold green][初始化][/] 前往 https://next.bgm.tv/demo/access-token 生成 Access Token')
             self.access_token = Prompt.ask(Text.assemble(("请输入 Access Token")), console=self.console)
             with self.console.status("[bold green][初始化中][/] 正在获取 username..."):
                 try:
                     self.username = requests.get('https://api.bgm.tv/v0/me', 
                     headers={'User-Agent':'Ukenn/BangumiBackups', 'Authorization': f'Bearer {self.access_token}'}).json()['username']
                 except:
-                    self.console.log('[bold red][初始化失败][/] 请检查 Access Token 是否正确')
+                    self.console.print('[bold red][初始化失败][/] 请检查 Access Token 是否正确')
                     exit(1)
-                self.console.log(f'[bold green][初始化成功][/] 获取到 User Name: [bold green]{self.username}[/]')
+                self.console.print(f'[bold green][初始化成功][/] 获取到 User Name: [bold green]{self.username}[/]')
                 cfg = json.dumps({
                     'username': self.username,
                     'access_token': self.access_token
@@ -53,11 +53,11 @@ class BangumiBackups(BangumiAPI):
                 with open('config.json', "wb") as cf:
                     cf.write(cfg)
                     cf.flush()
-            self.console.log('[bold green][初始化完成][/] 已将配置保存至 "config.json"')
+            self.console.print('[bold green][初始化完成][/] 已将配置保存至 "config.json"')
 
     async def main_menu(self) -> None:
         self.console.rule('>> 操作选项', align='left')
-        self.console.log(
+        self.console.print(
             '[bold yellow]> 1. 备份收藏列表 [/]\n'
             '[bold red]> 2. 退出 [/]\n')
         op = IntPrompt.ask(Text.assemble(("请输入操作序号")), default=2, choices=["1", "2"], console=self.console)
@@ -68,7 +68,7 @@ class BangumiBackups(BangumiAPI):
     
     async def collections(self) -> None:
         self.console.rule('>>> 备份收藏列表', align='left')
-        self.console.log(
+        self.console.print(
             '[bold yellow]> 1. 全部备份 [/]\n'
             '[bold yellow]> 2. 按类型备份 [/]\n'
             '[bold red]> 3. 返回上一级 [/]\n')
@@ -86,10 +86,13 @@ class BangumiBackups(BangumiAPI):
         for i in track(range(ceil(total["total"]/50)), description=f'[bold green][备份中][/] 共 {total["total"]} 个条目...'):
             self.data = await self.get_collections(i)
             await self.save_collections()
+        self.console.print(f':star: 已备份至 {self._backups_path}')
+        self.console.print( f'[bold green]备份完成![/] 成功备份数据共 [bold green]{total["total"]}[/] 个')
+        return
     
     async def collections_backup_by_subject_type(self) -> None:
         self.console.rule('>>>> 按类型备份 选择条目类型', align='left')
-        self.console.log(
+        self.console.print(
             '[bold yellow]> 1. 书籍 [/]\n'
             '[bold yellow]> 2. 动画 [/]\n'
             '[bold yellow]> 3. 音乐 [/]\n'
@@ -107,7 +110,7 @@ class BangumiBackups(BangumiAPI):
     
     async def collections_backup_by_type(self, subject_type) -> None:
         self.console.rule('>>>> 按类型备份 选择收藏类型', align='left')
-        self.console.log(
+        self.console.print(
             '[bold yellow]> 1. 想看 [/]\n'
             '[bold yellow]> 2. 看过 [/]\n'
             '[bold yellow]> 3. 在看 [/]\n'
@@ -129,6 +132,9 @@ class BangumiBackups(BangumiAPI):
         for i in track(range(ceil(total["total"]/50)), description=f'[bold green][备份中][/] 共 {total["total"]} 个条目...'):
             self.data = await self.get_collections(pages=i, type=op, subject_type=subject_type)
             await self.save_collections()
+        self.console.print(f':star: 已备份至 {self._backups_path}')
+        self.console.print( f'[bold green]备份完成![/] 成功备份数据共 [bold green]{total["total"]}[/] 个')
+        return
 
     async def save_collections(self) -> dict:
         """保存备份至数据库"""
