@@ -41,18 +41,16 @@ class BangumiBackups(BangumiAPI):
             self.access_token = Prompt.ask(Text.assemble(("请输入 Access Token")), console=self.console)
             with self.console.status("[bold green][初始化中][/] 正在获取 username..."):
                 try:
-                    self.username = requests.get('https://api.bgm.tv/v0/me', 
-                    headers={'User-Agent':'Ukenn/BangumiBackups', 'Authorization': f'Bearer {self.access_token}'}).json()['username']
+                    self.user_data = requests.get('https://api.bgm.tv/v0/me', 
+                    headers={'User-Agent':'Ukenn/BangumiBackups', 'Authorization': f'Bearer {self.access_token}'}).json()
+                    self.username = self.user_data['username']
                 except:
                     self.console.print('[bold red][初始化失败][/] 请检查 Access Token 是否正确')
                     exit(1)
                 self.console.print(f'[bold green][初始化成功][/] 获取到 User Name: [bold green]{self.username}[/]')
-                cfg = json.dumps({
-                    'username': self.username,
-                    'access_token': self.access_token
-                }, ensure_ascii=False).encode()
+                self.user_data['access_token'] = self.access_token
                 with open('config.json', "wb") as cf:
-                    cf.write(cfg)
+                    cf.write(json.dumps(self.user_data, indent=4).encode('utf-8'))
                     cf.flush()
             self.console.print('[bold green][初始化完成][/] 已将配置保存至 "config.json"')
 
